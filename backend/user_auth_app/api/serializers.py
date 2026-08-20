@@ -2,12 +2,13 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from user_auth_app.models import UserProfile
 from django.contrib.auth import authenticate
+import re
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ["email", "password"]
+        exclude = []
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -21,41 +22,53 @@ class UserLoginSerializer(serializers.Serializer):
 
         try:
             user = User.objects.get(email=email)
-        except User.DoesNotExist:
+        except user.DoesNotExist:
             raise serializers.ValidationError("Email does not exist")
 
-        user = authenticate(password=password)
+        user = authenticate(username=email, password=password)
 
         if user is None:
             raise serializers.ValidationError("Password not correct")
 
         data["user"] = user
+        data["fullname"] = user.userprofile.fullname
         return data
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-
+    password = serializers.CharField(write_only=True)
     repeated_password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User
+        model = UserProfile
 
-        fields = ["username", "email", "password", "repeated_password"]
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = ["fullname", "email", "password", "repeated_password"]
 
     def save(self):
         pw = self.validated_data["password"]
         repeated_pw = self.validated_data["repeated_password"]
-
+        pattern = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
+        
         if pw != repeated_pw:
             raise serializers.ValidationError({"error": "passwords dont match"})
 
-        if User.objects.filter(email=self.validated_data["email"]).exists():
+        if UserProfile.objects.filter(email=self.validated_data["email"]).exists():
             raise serializers.ValidationError("Email already exists")
 
+        if not re.match(pattern, self.validated_data["email"]):
+             raise serializers.ValidationError("Invalid email format")
+         
         account = User(
-            email=self.validated_data["email"], username=self.validated_data["username"]
-        )
+        username=self.validated_data["email"],
+        email=self.validated_data["email"],
+    )
         account.set_password(pw)
         account.save()
+    
+        UserProfile.objects.create(
+            user=account,
+            email=self.validated_data["email"],
+            fullname=self.validated_data["fullname"],
+        )
+    
         return account

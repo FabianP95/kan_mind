@@ -11,6 +11,7 @@ from rest_framework import status
 
 
 class UserProfileList(generics.ListCreateAPIView):
+    
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
@@ -31,7 +32,7 @@ class CustomLogin(ObtainAuthToken):
             token, created = Token.objects.get_or_create(user=user)
             data = {
                 'token': token.key,
-                'username': user.username,
+                'fullname': serializer.validated_data['fullname'],
                 'email': user.email,
                 'user_id': user.id,
             }
@@ -49,13 +50,13 @@ class RegistrationView(APIView):
         data = {}
         if serializer.is_valid():
             saved_account = serializer.save()
-            token, created = Token.objects.get_or_create(user=saved_account)
+            
             data = {
-                'token':token.key,
+                
                 'username':saved_account.username,
                 'email': saved_account.email
             }
         else:
             data = serializer.errors
             
-        return Response(data)
+        return Response(data, status=status.HTTP_201_CREATED)
