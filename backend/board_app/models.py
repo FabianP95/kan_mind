@@ -48,7 +48,7 @@ class Task(models.Model):
 
 class TaskComment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
-    creator = models.ForeignKey(
+    author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="comments_created"
     )
     content = models.TextField(blank=False)
