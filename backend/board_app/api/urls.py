@@ -6,8 +6,8 @@ from .views import BoardViewSet, TaskViewSet, TaskCommentViewSet
 
 router =routers.SimpleRouter()
 router.register(r'boards', BoardViewSet, basename='board')
-router.register(r'tasks', TaskViewSet)
-router.register(r'taskcomments', TaskCommentViewSet)
+router.register(r'tasks', TaskViewSet, basename='task')
+router.register(r'taskcomments', TaskCommentViewSet, basename='comment')
 
 
 

@@ -1,7 +1,18 @@
 from rest_framework import serializers
 from board_app.models import Board, Task, TaskComment
 from django.contrib.auth.models import User
+from user_auth_app.models import UserProfile
 
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        
+        model = UserProfile
+        
+        fields = [
+            "id",
+            "email",
+            "fullname"
+        ]
 
 class BoardSerializer(serializers.ModelSerializer):
     member_count = serializers.SerializerMethodField()
@@ -42,9 +53,27 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-
+    comments_count = serializers.SerializerMethodField()
+    reviewer = UserInfoSerializer(read_only=True, allow_null=True)
+    assignee = UserInfoSerializer(read_only=True, allow_null=True)
     class Meta:
         model = Task
+        
+        fields = [
+                    "id",
+                    "board",
+                    "title",
+                    "description",
+                    "status",
+                    "priority",
+                    "assignee",
+                    "reviewer",
+                    "due_date",
+                    "comments_count",
+                ]
+        
+    def get_comments_count(self, obj):
+                return obj.comments.count()
 
 
 
@@ -53,3 +82,5 @@ class TaskCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskComment
     
+
+
