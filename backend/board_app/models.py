@@ -29,7 +29,7 @@ class Task(models.Model):
     description = models.TextField(blank=True)
     priority = models.CharField(max_length=10, choices=Priority.choices)
     status = models.CharField(max_length=20, choices=Status.choices)
-    due_date = models.DateField(null=True, blank=True, read_only=True)
+    due_date = models.DateField(null=True, blank=True)
     assignee = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,

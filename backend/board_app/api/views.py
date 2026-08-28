@@ -1,15 +1,27 @@
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .serializers import BoardSerializer, TaskSerializer, TaskCommentSerializer
+from .serializers import (
+    BoardSerializer,
+    TaskSerializer,
+    TaskCommentSerializer,
+    BoardDetailSerializer,
+)
 from board_app.models import Task, Board, TaskComment
 from django.contrib.auth.models import User
 from django.db.models import Q
+from rest_framework.response import Response
 
 
 class BoardViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = BoardSerializer
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return BoardDetailSerializer
+        return self.serializer_class
 
     def get_queryset(self):
         user = self.request.user
@@ -19,17 +31,31 @@ class BoardViewSet(viewsets.ModelViewSet):
         serializer.save(creator=self.request.user)
 
 
+
+
+
 class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
 
-    def get_queryset(self):
-        user = self.request.user
-        return Task.objects.filter(reviewer=user , board=self.request.board.id)
     
     def get_queryset(self):
-            user = self.request.user
-            return Task.objects.filter(assignee=user , board=self.request.board.id)
+        user = self.request.user
+        return Task.objects.filter(Q(board__creator=user) | Q(board__members=user))
+        
+    @action(detail=False, methods=["get"], url_path="assigned-to-me")
+    def assigned_to_me(self, request):
+        user = self.request.user
+        tasks = Task.objects.filter(assignee = user)
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data) 
+
+    @action(detail=False, methods=["get"], url_path="reviewing")
+    def reviewing(self, request):
+        user = self.request.user
+        tasks = Task.objects.filter(reviewer = user)
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data) 
 
 
 class TaskCommentViewSet(viewsets.ModelViewSet):
