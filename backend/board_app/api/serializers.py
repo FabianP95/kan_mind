@@ -53,6 +53,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+
     comments_count = serializers.SerializerMethodField()
     reviewer = UserInfoSerializer(read_only=True, allow_null=True)
     assignee = UserInfoSerializer(read_only=True, allow_null=True)
@@ -98,24 +99,46 @@ class TaskSerializer(serializers.ModelSerializer):
         user = request.user
         assignee = attrs.get("assignee")
         reviewer = attrs.get("reviewer")
+
+        if (
+            self.instance is not None
+            and board is not None
+            and board != self.instance.board
+        ):
+            raise ValidationError("Dieser Task gehört nicht zu dem angegeben Board.")
+
+        if not board:
+            board = self.instance.board
+
         if not (board.creator == user or board.members.filter(id=user.id).exists()):
             raise PermissionDenied(
                 "Du musst Mitglied dieses Boards sein, um eine Task zu erstellen."
             )
 
-        if assignee and not board.members.filter(id=assignee.id).exists():
-            raise ValidationError()
+        if assignee and not (
+            board.creator == user or board.members.filter(id=assignee.id).exists()
+        ):
+            raise ValidationError("Assignee nicht Mitglied des Boards.")
 
-        if reviewer and not board.members.filter(id=reviewer.id).exists():
-            raise ValidationError()
-        
+        if reviewer and not (
+            board.creator == user or board.members.filter(id=reviewer.id).exists()
+        ):
+            raise ValidationError("Reviewer nicht Mitglied des Boards.")
+
         return attrs
 
 
 class TaskCommentSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source="author.userprofile.fullname", read_only=True)
 
     class Meta:
         model = TaskComment
+        fields = [
+            "id",
+            "created_at",
+            "author",
+            "content",
+        ]
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
@@ -131,4 +154,24 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             "owner_id",
             "members",
             "tasks",
+        ]
+
+
+class UpdateBoardSerializer(serializers.ModelSerializer):
+    owner_data = UserInfoSerializer(source="creator", read_only=True, many=False)
+    members_data = UserInfoSerializer(source="members", read_only=True, many=True)
+    members = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        many=True,
+        write_only=True,
+    )
+
+    class Meta:
+        model = Board
+        fields = [
+            "id",
+            "title",
+            "owner_data",
+            "members_data",
+            "members",
         ]
