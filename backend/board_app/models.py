@@ -26,9 +26,12 @@ class Task(models.Model):
 
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name="tasks")
     creator = models.ForeignKey(
-            User, on_delete=models.SET_NULL, related_name="tasks_created",null=True,
-                    blank=True,
-        )
+        User,
+        on_delete=models.SET_NULL,
+        related_name="tasks_created",
+        null=True,
+        blank=True,
+    )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     priority = models.CharField(max_length=10, choices=Priority.choices)
@@ -53,7 +56,11 @@ class Task(models.Model):
 class TaskComment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="comments_created"
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="comments_created",
     )
     content = models.TextField(blank=False)
     created_at = models.DateTimeField(auto_now_add=True)

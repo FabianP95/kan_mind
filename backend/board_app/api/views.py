@@ -13,7 +13,7 @@ from board_app.models import Task, Board, TaskComment
 from django.contrib.auth.models import User
 from django.db.models import Q
 from rest_framework.response import Response
-from .permissions import IsCreatorOrBoardCreator, IsBoardCreator
+from .permissions import IsCreatorOrBoardCreator, IsBoardCreator, IsCommentAuthor
 
 
 class BoardViewSet(viewsets.ModelViewSet):
@@ -64,9 +64,13 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
 class TaskCommentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCommentAuthor]
     serializer_class = TaskCommentSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        return TaskComment.objects.filter(Q(creator=user) | Q(members=user))
+        task_id = self.kwargs["task_pk"]
+        return TaskComment.objects.filter(task_id = task_id)
+    
+    def perform_create(self, serializer):
+        task_id = self.kwargs["task_pk"]
+        serializer.save(author=self.request.user, task_id = task_id)
