@@ -1,3 +1,5 @@
+"""Board domain models for KanMind boards, tasks, and task comments."""
+
 from django.db import models
 from django.contrib.auth.models import User
 

@@ -62,7 +62,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "kan_mind.urls"
+ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
@@ -79,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "kan_mind.wsgi.application"
+WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database
@@ -117,6 +117,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
+"""Django project settings for the KanMind backend."""
+
 TIME_ZONE = "UTC"
 
 USE_I18N = True
@@ -141,7 +143,7 @@ MAILERS = {
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",  # isAuthenticated nachher wieder adden allowAny nur für das erste testen
+        "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",

@@ -1,6 +1,8 @@
+"""Authentication API endpoints for registration, login, and email checks."""
+
 from django.urls import path
+
 from .views import RegistrationView, CustomLogin, CheckEmailView
-from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path("registration/", RegistrationView.as_view(), name="registration"),

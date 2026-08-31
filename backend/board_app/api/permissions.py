@@ -1,5 +1,8 @@
-from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
+"""Permission checks for board ownership and comment/task access rules."""
+
+from rest_framework.permissions import BasePermission
 from board_app.models import Task
+
 
 class IsCreatorOrBoardCreator(BasePermission):
 

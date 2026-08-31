@@ -1,8 +1,11 @@
-from rest_framework import serializers
-from board_app.models import Board, Task, TaskComment
+"""Serializer layer for boards, tasks, comments, and member metadata."""
+
 from django.contrib.auth.models import User
-from user_auth_app.models import UserProfile
+from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
+
+from board_app.models import Board, Task, TaskComment
+from user_auth_app.models import UserProfile
 
 
 class UserInfoSerializer(serializers.ModelSerializer):

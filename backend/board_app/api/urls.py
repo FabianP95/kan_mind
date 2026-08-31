@@ -1,3 +1,5 @@
+"""URL routing for board-related API endpoints and nested task comments."""
+
 from django.urls import path, include
 from rest_framework import routers
 from rest_framework_nested.routers import NestedDefaultRouter

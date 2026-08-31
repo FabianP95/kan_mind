@@ -1,7 +1,11 @@
-from rest_framework import status
+"""API viewsets for managing boards, tasks, and task comments."""
+
+from django.db.models import Q
 from rest_framework.decorators import action
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from .serializers import (
     BoardSerializer,
     TaskSerializer,
@@ -10,9 +14,6 @@ from .serializers import (
     UpdateBoardSerializer,
 )
 from board_app.models import Task, Board, TaskComment
-from django.contrib.auth.models import User
-from django.db.models import Q
-from rest_framework.response import Response
 from .permissions import IsCreatorOrBoardCreator, IsBoardCreator, IsCommentAuthor
 
 
@@ -38,7 +39,7 @@ class BoardViewSet(viewsets.ModelViewSet):
 class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsCreatorOrBoardCreator]
     serializer_class = TaskSerializer
-    
+
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
 
@@ -60,8 +61,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
 
-    
-
 
 class TaskCommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsCommentAuthor]
@@ -69,8 +68,8 @@ class TaskCommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         task_id = self.kwargs["task_pk"]
-        return TaskComment.objects.filter(task_id = task_id)
-    
+        return TaskComment.objects.filter(task_id=task_id)
+
     def perform_create(self, serializer):
         task_id = self.kwargs["task_pk"]
-        serializer.save(author=self.request.user, task_id = task_id)
+        serializer.save(author=self.request.user, task_id=task_id)

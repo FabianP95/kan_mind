@@ -1,8 +1,13 @@
-from rest_framework import serializers
-from django.contrib.auth.models import User
-from user_auth_app.models import UserProfile
-from django.contrib.auth import authenticate
+"""Serializers for login, registration, and user profile validation."""
+
 import re
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework import serializers
+
+from user_auth_app.models import UserProfile
+
+
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -12,7 +17,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
@@ -41,14 +45,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-
         fields = ["fullname", "email", "password", "repeated_password"]
 
     def save(self):
         pw = self.validated_data["password"]
         repeated_pw = self.validated_data["repeated_password"]
         pattern = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
-        
+
         if pw != repeated_pw:
             raise serializers.ValidationError({"error": "passwords dont match"})
 
@@ -56,19 +59,19 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email already exists")
 
         if not re.match(pattern, self.validated_data["email"]):
-             raise serializers.ValidationError("Invalid email format")
-         
+            raise serializers.ValidationError("Invalid email format")
+
         account = User(
-        username=self.validated_data["email"],
-        email=self.validated_data["email"],
-    )
+            username=self.validated_data["email"],
+            email=self.validated_data["email"],
+        )
         account.set_password(pw)
         account.save()
-    
+
         UserProfile.objects.create(
             user=account,
             email=self.validated_data["email"],
             fullname=self.validated_data["fullname"],
         )
-    
+
         return account

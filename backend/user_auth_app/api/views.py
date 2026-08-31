@@ -1,12 +1,14 @@
-from .serializers import UserLoginSerializer
+"""Authentication endpoints for login, registration, and email lookup."""
+
+from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializers import RegistrationSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import status
-from django.contrib.auth.models import User
+
+from .serializers import UserLoginSerializer, RegistrationSerializer
 
 
 class CustomLogin(ObtainAuthToken):
