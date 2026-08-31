@@ -115,16 +115,16 @@ class TaskSerializer(serializers.ModelSerializer):
 
         if not (board.creator == user or board.members.filter(id=user.id).exists()):
             raise PermissionDenied(
-                "Du musst Mitglied dieses Boards sein, um eine Task zu erstellen."
+                "Du musst Mitglied dieses Boards sein oder der Creator, um eine Task zu erstellen."
             )
 
         if assignee and not (
-            board.creator == user or board.members.filter(id=assignee.id).exists()
+             board.creator_id == assignee.id or board.members.filter(id=assignee.id).exists()
         ):
             raise ValidationError("Assignee nicht Mitglied des Boards.")
 
         if reviewer and not (
-            board.creator == user or board.members.filter(id=reviewer.id).exists()
+             board.creator_id == reviewer.id or board.members.filter(id=reviewer.id).exists()
         ):
             raise ValidationError("Reviewer nicht Mitglied des Boards.")
 
