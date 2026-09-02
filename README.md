@@ -27,6 +27,23 @@ Before starting the project, make sure you have the following installed:
 - VS Code (recommended)
 - Optional: Live Server extension for the frontend
 
+The backend dependencies are pinned in `backend/requirements.txt`:
+
+```text
+asgiref==3.12.1
+Django==6.1
+django-cors-headers==4.9.0
+djangorestframework==3.18.0
+drf-nested-routers==0.95.3
+flake8==7.3.0
+mccabe==0.7.0
+pycodestyle==2.14.0
+pyflakes==3.4.0
+python-dotenv==1.2.2
+sqlparse==0.6.0
+tzdata==2026.3
+```
+
 ---
 
 ## Environment variables
