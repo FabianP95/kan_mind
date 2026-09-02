@@ -40,12 +40,15 @@ class RegistrationView(APIView):
         data = {}
         if serializer.is_valid():
             saved_account = serializer.save()
-
-            data = {"username": saved_account.username, "email": saved_account.email}
-        else:
-            data = serializer.errors
-
-        return Response(data, status=status.HTTP_201_CREATED)
+            token, created = Token.objects.get_or_create(user=saved_account)
+            data = {
+                "token": token.key,
+                "fullname": saved_account.userprofile.fullname,
+                "email": saved_account.email,
+                "user_id": saved_account.id,
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CheckEmailView(APIView):
