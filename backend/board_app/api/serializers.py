@@ -119,12 +119,14 @@ class TaskSerializer(serializers.ModelSerializer):
             )
 
         if assignee and not (
-             board.creator_id == assignee.id or board.members.filter(id=assignee.id).exists()
+            board.creator_id == assignee.id
+            or board.members.filter(id=assignee.id).exists()
         ):
             raise ValidationError("Assignee nicht Mitglied des Boards.")
 
         if reviewer and not (
-             board.creator_id == reviewer.id or board.members.filter(id=reviewer.id).exists()
+            board.creator_id == reviewer.id
+            or board.members.filter(id=reviewer.id).exists()
         ):
             raise ValidationError("Reviewer nicht Mitglied des Boards.")
 
@@ -178,3 +180,16 @@ class UpdateBoardSerializer(serializers.ModelSerializer):
             "members_data",
             "members",
         ]
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        user = request.user
+        old_title = self.instance.title
+        new_title = attrs.get("title")
+        creator = self.instance.creator
+      
+        
+        if new_title and (new_title != old_title and user != creator):
+            raise ValidationError ("Mitglieder dürfen den Titel des Boards nicht ändern.")
+        
+        return attrs
