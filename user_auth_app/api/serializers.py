@@ -27,7 +27,7 @@ class UserLoginSerializer(serializers.Serializer):
         try:
             user = User.objects.get(email=email)
         except user.DoesNotExist:
-            raise serializers.ValidationError("Email does not exist")
+            raise serializers.ValidationError({"error": "Email does not exist"})
 
         user = authenticate(username=email, password=password)
 
