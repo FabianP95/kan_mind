@@ -29,8 +29,11 @@ class BoardViewSet(viewsets.ModelViewSet):
         return self.serializer_class
 
     def get_queryset(self):
-        user = self.request.user
-        return Board.objects.filter(Q(creator=user) | Q(members=user)).distinct()
+        if self.action == "list":
+            user = self.request.user
+            return Board.objects.filter(Q(creator=user) | Q(members=user)).distinct()
+        else:
+            return Board.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
@@ -44,8 +47,11 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer.save(creator=self.request.user)
 
     def get_queryset(self):
-        user = self.request.user
-        return Task.objects.filter(Q(board__creator=user) | Q(board__members=user)).distinct()
+        if self.action == "list":
+            user = self.request.user
+            return Task.objects.filter(Q(board__creator=user) | Q(board__members=user)).distinct()
+        else:
+            return Task.objects.all()
 
     @action(detail=False, methods=["get"], url_path="assigned-to-me")
     def assigned_to_me(self, request):
