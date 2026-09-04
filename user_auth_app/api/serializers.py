@@ -56,10 +56,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"error": "passwords dont match"})
 
         if UserProfile.objects.filter(email=self.validated_data["email"]).exists():
-            raise serializers.ValidationError("Email already exists")
+            raise serializers.ValidationError({"error": "Email does not exist"})
 
         if not re.match(pattern, self.validated_data["email"]):
-            raise serializers.ValidationError("Invalid email format")
+            raise serializers.ValidationError({"error": "Invalid email format"})
 
         account = User(
             username=self.validated_data["email"],
