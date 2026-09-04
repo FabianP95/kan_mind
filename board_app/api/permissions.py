@@ -22,7 +22,7 @@ class IsCreatorOrBoardCreator(BasePermission):
 
     def has_object_permission(self, request, view, obj):
 
-        if request.method == ("PATCH", "PUT"):
+        if request.method in ("PATCH", "PUT"):
             user = request.user
             return bool(
                 obj.board.creator == user
@@ -35,16 +35,35 @@ class IsCreatorOrBoardCreator(BasePermission):
         return True
 
 
-class IsBoardCreator(BasePermission):
+class IsBoardCreatorOrMember(BasePermission):
+
+    def has_permission(self, request, view):
+        
+        
+        if request.method == "GET" and view.action == "retrieve":
+            current_user = request.user
+                    
+            board_id = view.kwargs["pk"]
+            board = get_object_or_404(Board, id = board_id)
+            board_creator = board.creator
+            
+            return bool(board_creator == current_user or board.members.filter(id=current_user.id).exists())
+        else: 
+            return True
+
     def has_object_permission(self, request, view, obj):
 
         current_user = request.user
         board_creator = obj.creator
+        members = obj.members
 
-        if request.method == "DELETE":
+        if request.method in ("PATCH", "PUT"):
+            return bool(board_creator == current_user or members.filter(id=current_user.id).exists())
+        elif request.method == "DELETE":
             return bool(board_creator == current_user)
-        else:
-            return True
+        else: 
+            return bool(board_creator == current_user or members.filter(id=current_user.id).exists())
+       
 
 
 class IsCommentAuthor(BasePermission):

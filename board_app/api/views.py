@@ -14,11 +14,11 @@ from .serializers import (
     UpdateBoardSerializer,
 )
 from board_app.models import Task, Board, TaskComment
-from .permissions import IsCreatorOrBoardCreator, IsBoardCreator, IsCommentAuthor
+from .permissions import IsCreatorOrBoardCreator, IsBoardCreatorOrMember, IsCommentAuthor
 
 
 class BoardViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsBoardCreator]
+    permission_classes = [IsAuthenticated, IsBoardCreatorOrMember]
     serializer_class = BoardSerializer
 
     def get_serializer_class(self):
@@ -30,7 +30,7 @@ class BoardViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Board.objects.filter(Q(creator=user) | Q(members=user))
+        return Board.objects.filter(Q(creator=user) | Q(members=user)).distinct()
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
@@ -45,7 +45,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Task.objects.filter(Q(board__creator=user) | Q(board__members=user))
+        return Task.objects.filter(Q(board__creator=user) | Q(board__members=user)).distinct()
 
     @action(detail=False, methods=["get"], url_path="assigned-to-me")
     def assigned_to_me(self, request):
