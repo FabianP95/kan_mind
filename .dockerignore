@@ -1,0 +1,11 @@
+# Virtual environment
+.venv/
+venv/
+env/
+.env/
+
+# Secrets
+.env
+*.env.local
+
+frontend/
